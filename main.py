@@ -58,4 +58,4 @@ def patient_post(pk: int):
     global patient_list
     if 0 <= pk < len(patient_list):
         return patient_list[pk]
-    raise HTTPException(status_code=404, detail="Patient not found")
+    raise HTTPException(status_code=204, detail="Nonexistent patient")
