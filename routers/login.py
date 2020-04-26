@@ -41,7 +41,7 @@ def login(response: Response, session_token: str = Depends(check_login_data)):
     session_tokens.add(session_token)
 
 
-@router.post("/logout", dependencies=[Depends(check_login_data)])
+@router.post("/logout")
 def logout(response: Response, request: Request):
     token = check_session_token(request.cookies.get('session_token'))
     session_tokens.remove(token)
