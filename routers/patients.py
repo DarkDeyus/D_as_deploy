@@ -22,9 +22,9 @@ class PatientPostResponse(BaseModel):
 
 @router.post("/patient", response_model=PatientPostResponse, dependencies=[Depends(check_if_logged_in)])
 def patient_post(request: PatientPostRequest, response: Response):
-    global patients, next_id
-    number = next_id
-    next_id += 1
+    global patients, next_id_number
+    number = next_id_number
+    next_id_number += 1
     patients[f"id_{number}"] = request.dict()
 
     response.headers['Location'] = f"/patient/{number}"
@@ -37,7 +37,6 @@ def patient_post(request: PatientPostRequest, response: Response):
 def patient_get_id():
     global patients
     return patients
-
 
 
 @router.get("/patient/{pk}", dependencies=[Depends(check_if_logged_in)])
