@@ -1,8 +1,10 @@
 from typing import Set
-from fastapi import FastAPI, HTTPException, Response, Cookie, Depends, status, APIRouter
+from fastapi import HTTPException, Response, Cookie, Depends, status, APIRouter, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from hashlib import sha256
+from starlette.responses import RedirectResponse
 import secrets
+
 
 router = APIRouter()
 security = HTTPBasic()
@@ -25,6 +27,12 @@ def check_login_data(credentials: HTTPBasicCredentials = Depends(security)):
     return session_token
 
 
+def check_session_token(token: str):
+    if token not in session_tokens:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorised")
+    return token
+
+
 @router.post("/login")
 def login(response: Response, session_token: str = Depends(check_login_data)):
     response.set_cookie(key='session_token', value=session_token)
@@ -32,3 +40,9 @@ def login(response: Response, session_token: str = Depends(check_login_data)):
     response.status_code = status.HTTP_301_MOVED_PERMANENTLY
     session_tokens.add(session_token)
 
+
+@router.post("/logout", dependencies=[Depends(check_login_data)])
+def logout(response: Response, request: Request):
+    token = check_session_token(request.cookies.get('session_token'))
+    session_tokens.remove(token)
+    return RedirectResponse("/")
