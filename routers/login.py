@@ -10,7 +10,7 @@ security = HTTPBasic()
 
 router.secret_key = "You will never guess it! It is just impossible to do so!"
 
-session_tokens: Set[str] = set()
+sessions: Dict[str, str] = {}
 
 
 def check_login_data(credentials: HTTPBasicCredentials = Depends(security)):
@@ -23,28 +23,31 @@ def check_login_data(credentials: HTTPBasicCredentials = Depends(security)):
         )
     session_token = sha256(bytes(f"{credentials.username}{credentials.password}{router.secret_key}",
                                  encoding='utf-8')).hexdigest()
-    return session_token
+    return session_token, credentials.username
 
 
 def check_if_logged_in(request: Request):
     token = request.cookies.get('session_token')
-    if token not in session_tokens:
+    if token not in sessions:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorised")
     return token
 
 
 @router.post("/login")
-def login(response: Response, session_token: str = Depends(check_login_data)):
+def login(response: Response, session: (str, str) = Depends(check_login_data)):
+    session_token, username = session
     response.set_cookie(key='session_token', value=session_token)
     response.headers['Location'] = "/welcome"
     response.status_code = status.HTTP_301_MOVED_PERMANENTLY
-    session_tokens.add(session_token)
+
+    if session_token not in sessions:
+        sessions[session_token] = username
 
 
 @router.post("/logout", dependencies=[Depends(check_if_logged_in)])
 def logout(response: Response, request: Request):
     token = request.cookies.get('session_token')
-    session_tokens.remove(token)
+    sessions.remove(token)
 
     response.headers['Location'] = '/'
     response.status_code = status.HTTP_301_MOVED_PERMANENTLY
