@@ -45,6 +45,11 @@ def method_delete():
     return {"method": "DELETE"}
 
 
+@app.get("/welcome")
+def welcome_get():
+    return "Jakiś powitalny tekst"
+
+
 @app.post("/patient", response_model=PatientPostResponse)
 def patient_post(request: PatientPostRequest):
     global patient_list
