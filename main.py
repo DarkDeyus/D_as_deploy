@@ -42,7 +42,7 @@ def method_delete():
 
 @app.get("/welcome", dependencies=[Depends(check_if_logged_in)])
 def welcome_get(request: Request):
-    username = login.sessions[request.cookies.get('session_token')]
+    username = login.router.sessions[request.cookies.get('session_token')]
     return templates.TemplateResponse("welcome.html", {"request": request, "user": username})
 
 

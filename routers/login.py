@@ -4,13 +4,11 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from hashlib import sha256
 import secrets
 
-
 router = APIRouter()
-security = HTTPBasic()
-
 router.secret_key = "You will never guess it! It is just impossible to do so!"
+router.sessions: Dict[str, str] = {}
 
-sessions: Dict[str, str] = {}
+security = HTTPBasic()
 
 
 def check_login_data(credentials: HTTPBasicCredentials = Depends(security)):
@@ -28,7 +26,7 @@ def check_login_data(credentials: HTTPBasicCredentials = Depends(security)):
 
 def check_if_logged_in(request: Request):
     token = request.cookies.get('session_token')
-    if token not in sessions:
+    if token not in router.sessions:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorised")
     return token
 
@@ -40,14 +38,14 @@ def login(response: Response, session: (str, str) = Depends(check_login_data)):
     response.headers['Location'] = "/welcome"
     response.status_code = status.HTTP_301_MOVED_PERMANENTLY
 
-    if session_token not in sessions:
-        sessions[session_token] = username
+    if session_token not in router.sessions:
+        router.sessions[session_token] = username
 
 
 @router.post("/logout", dependencies=[Depends(check_if_logged_in)])
 def logout(response: Response, request: Request):
     token = request.cookies.get('session_token')
-    sessions.remove(token)
+    router.sessions.remove(token)
 
     response.headers['Location'] = '/'
     response.status_code = status.HTTP_301_MOVED_PERMANENTLY

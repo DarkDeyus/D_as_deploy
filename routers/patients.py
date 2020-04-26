@@ -4,10 +4,8 @@ from pydantic import BaseModel
 from routers.login import check_if_logged_in
 
 router = APIRouter()
-
-patients: Dict[str, dict] = {}
-
-next_id_number = 0
+router.patients: Dict[str, dict] = {}
+router.next_id_number = 0
 
 
 class PatientPostRequest(BaseModel):
@@ -22,10 +20,10 @@ class PatientPostResponse(BaseModel):
 
 @router.post("/patient", response_model=PatientPostResponse, dependencies=[Depends(check_if_logged_in)])
 def patient_post(request: PatientPostRequest, response: Response):
-    global patients, next_id_number
-    number = next_id_number
-    next_id_number += 1
-    patients[f"id_{number}"] = request.dict()
+
+    number = router.next_id_number
+    router.next_id_number += 1
+    router.patients[f"id_{number}"] = request.dict()
 
     response.headers['Location'] = f"/patient/{number}"
     response.status_code = status.HTTP_301_MOVED_PERMANENTLY
@@ -35,25 +33,19 @@ def patient_post(request: PatientPostRequest, response: Response):
 
 @router.get("/patient", dependencies=[Depends(check_if_logged_in)])
 def patient_get_id():
-    global patients
-    return patients
+    return router.patients
 
 
-@router.get("/patient/{pk}", dependencies=[Depends(check_if_logged_in)])
-def patient_get_id(pk: int):
-    global patients
-    key = f"id_{pk}"
-    if key in patients:
-        return patients[key]
-    else:
-        raise HTTPException(status_code=204, detail="Nonexistent patient")
+@router.get("/patient/{patient_id}", dependencies=[Depends(check_if_logged_in)])
+def patient_get_id(patient_id: int):
+    key = f"id_{patient_id}"
+    if key in router.patients:
+        return router.patients[key]
 
 
-@router.delete("/patient/{pk}", dependencies=[Depends(check_if_logged_in)])
-def patient_delete_id(pk: int):
-    global patients
-    key = f"id_{pk}"
-    if key in patients:
-        patients.pop(key)
-    else:
-        raise HTTPException(status_code=204, detail="Nonexistent patient")
+@router.delete("/patient/{patient_id}", dependencies=[Depends(check_if_logged_in)])
+def patient_delete_id(response: Response, patient_id: int):
+    key = f"id_{patient_id}"
+    router.patients.pop(key)
+    response.status_code = status.HTTP_204_NO_CONTENT
+
