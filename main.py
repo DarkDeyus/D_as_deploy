@@ -1,13 +1,13 @@
-from typing import Dict
-from fastapi import FastAPI, HTTPException, Response, Cookie, Depends, status
-from pydantic import BaseModel
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import FastAPI, Depends, Request
 from routers import patients, login
-import secrets
+from routers.login import check_if_logged_in
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 app.include_router(patients.router)
 app.include_router(login.router)
+
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
@@ -40,8 +40,9 @@ def method_delete():
     return {"method": "DELETE"}
 
 
-@app.get("/welcome")
-def welcome_get():
-    return "Jakiś powitalny tekst"
+@app.get("/welcome", dependencies=[Depends(check_if_logged_in)])
+def welcome_get(request: Request):
+    # todo: should get user somehow
+    return templates.TemplateResponse("welcome.html", {"request": request, "user": "trudnY"})
 
 
