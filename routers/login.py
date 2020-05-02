@@ -11,6 +11,10 @@ router.sessions: Dict[str, str] = {}
 security = HTTPBasic()
 
 
+def get_sessions():
+    return router.sessions
+
+
 def check_login_data(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(credentials.username, "trudnY")
     correct_password = secrets.compare_digest(credentials.password, "PaC13Nt")
