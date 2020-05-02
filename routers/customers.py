@@ -24,10 +24,10 @@ async def update_customer(customer_id: int, request: CustomerPutRequest, respons
     connection.row_factory = aiosqlite.Row
     cursor = await connection.execute("SELECT Company AS company, Address as address, City as city, State as state,"
                                       " Country as country, PostalCode as postalcode, Fax as fax FROM customers"
-                                      " WHERE CustomerId IS ? ", (customer_id,))
+                                      " WHERE CustomerId = ? ", (customer_id,))
     customer = await cursor.fetchone()
 
-    if len(customer) == 0:
+    if not customer:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"detail": {"error": "Customer of given id does not exist"}}
 
