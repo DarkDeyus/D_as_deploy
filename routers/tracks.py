@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+
 class AlbumPostRequest(BaseModel):
     title: str
     artist_id: int

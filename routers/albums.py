@@ -31,6 +31,7 @@ async def create_album(request: AlbumPostRequest, response: Response, connection
     response.status_code = status.HTTP_201_CREATED
     return artist
 
+
 @router.get("/albums/{album_id}")
 async def get_album(album_id: int, connection: aiosqlite.Connection = Depends(get_db_conn)):
     connection.row_factory = aiosqlite.Row
