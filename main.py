@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, Request
-from routers import patients, login, tracks, albums
+from routers import patients, login, tracks, albums, customers, sales
 from routers.login import check_if_logged_in
 from fastapi.templating import Jinja2Templates
 import database as db
@@ -10,6 +10,8 @@ app.include_router(patients.router)
 app.include_router(login.router)
 app.include_router(tracks.router)
 app.include_router(albums.router)
+app.include_router(customers.router)
+app.include_router(sales.router)
 
 templates = Jinja2Templates(directory="templates")
 

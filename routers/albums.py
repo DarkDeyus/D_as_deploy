@@ -26,7 +26,7 @@ async def create_album(request: AlbumPostRequest, response: Response, connection
     connection.commit()
 
     cursor = await connection.execute(
-        "SELECT * FROM artists WHERE Title = ? AND ArtistId = ?", (request.title, request.artist_id))
+        "SELECT * FROM albums WHERE Title = ? AND ArtistId = ?", (request.title, request.artist_id))
     artist = await cursor.fetchone()
     response.status_code = status.HTTP_201_CREATED
     return artist
@@ -35,7 +35,7 @@ async def create_album(request: AlbumPostRequest, response: Response, connection
 async def get_album(album_id: int, connection: aiosqlite.Connection = Depends(get_db_conn)):
     connection.row_factory = aiosqlite.Row
 
-    cursor = await connection.execute("SELECT * FROM artists WHERE AlbumId = ?", (album_id, ))
+    cursor = await connection.execute("SELECT * FROM albums WHERE AlbumId = ?", (album_id, ))
     artist = await cursor.fetchone()
     return artist
 
