@@ -23,8 +23,8 @@ async def get_tracks(page: int = 0, per_page: int = 10,
 async def get_composers(composer_name: str, response: Response, connection: aiosqlite.Connection = Depends(get_db_conn)):
 
     connection.row_factory = lambda cursor, x: x[0]
-    cursor = await connection.execute("SELECT Name, Composer FROM tracks WHERE Composer LIKE ? ORDER BY Name ASC",
-                                      (f"%{composer_name}%", ))
+    cursor = await connection.execute("SELECT Name, Composer FROM tracks WHERE Composer = ? ORDER BY Name ASC",
+                                      (composer_name, ))
     tracks = await cursor.fetchall()
 
     if len(tracks) == 0:

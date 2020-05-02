@@ -22,7 +22,7 @@ async def create_album(request: AlbumPostRequest, response: Response, connection
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"detail": {"error": "Artist of given id does not exist"}}
 
-    await connection.execute("INSERT INTO albums VALUES (?, ?)", (request.title, request.artist_id))
+    await connection.execute("INSERT INTO albums (Title, ArtistId) VALUES (?, ?)", (request.title, request.artist_id))
     connection.commit()
 
     cursor = await connection.execute(
