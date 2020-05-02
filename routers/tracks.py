@@ -1,9 +1,13 @@
-from typing import Dict
 import aiosqlite
-from fastapi import HTTPException, APIRouter, Depends, Response, status, Query
+from fastapi import APIRouter, Depends, Response, status
 from database import get_db_conn
+from pydantic import BaseModel
 
 router = APIRouter()
+
+class AlbumPostRequest(BaseModel):
+    title: str
+    artist_id: int
 
 
 @router.get("/tracks")
@@ -25,7 +29,8 @@ async def get_composers(composer_name: str, response: Response, connection: aios
 
     if len(tracks) == 0:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return {"detail": {"error": "No songs of given composer"}}
+        return {"detail": {"error": "No tracks of given composer"}}
     else:
         return tracks
+
 
