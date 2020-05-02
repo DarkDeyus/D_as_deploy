@@ -2,6 +2,7 @@ import aiosqlite
 from fastapi import APIRouter, Depends, Response, status
 from database import get_db_conn
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
 
@@ -17,16 +18,16 @@ class CustomerPutRequest(BaseModel):
 
 
 @router.put("/customers/{customer_id}")
-async def create_album(customer_id: int, request: CustomerPutRequest, response: Response,
+async def update_customer(customer_id: int, request: CustomerPutRequest, response: Response,
                        connection: aiosqlite.Connection = Depends(get_db_conn)):
 
     connection.row_factory = aiosqlite.Row
     cursor = await connection.execute("SELECT Company AS company, Address as address, City as city, State as state,"
                                       " Country as country, PostalCode as postalcode, Fax as fax FROM customers"
                                       " WHERE CustomerId IS ? ", (customer_id,))
-    customer = await cursor.fetchall()
+    customer = await cursor.fetchone()
 
-    if len(customer) != 1:
+    if len(customer) == 0:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"detail": {"error": "Customer of given id does not exist"}}
 
@@ -43,7 +44,7 @@ async def create_album(customer_id: int, request: CustomerPutRequest, response: 
                                                                                         updated.postalcode,
                                                                                         updated.fax,
                                                                                         customer_id))
-    connection.commit()
+    await connection.commit()
 
     cursor = await connection.execute("SELECT * FROM customers WHERE CustomerId = ?", (customer_id, ))
     return await cursor.fetchone()

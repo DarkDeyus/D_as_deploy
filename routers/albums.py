@@ -23,7 +23,7 @@ async def create_album(request: AlbumPostRequest, response: Response, connection
         return {"detail": {"error": "Artist of given id does not exist"}}
 
     await connection.execute("INSERT INTO albums (Title, ArtistId) VALUES (?, ?)", (request.title, request.artist_id))
-    connection.commit()
+    await connection.commit()
 
     cursor = await connection.execute(
         "SELECT * FROM albums WHERE Title = ? AND ArtistId = ?", (request.title, request.artist_id))

@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.get("/sales")
-async def create_album(category: str, response: Response,
+async def get_statistics(category: str, response: Response,
                        connection: aiosqlite.Connection = Depends(get_db_conn)):
 
     if category == "customers":
